@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -25,23 +25,35 @@ def _try_get_user_id(request: Request) -> uuid.UUID | None:
         return None
 
 
+def _write_audit_row(request: Request, status_code: int) -> None:
+    """Isolated so a DB failure while logging can never mask/replace
+    the real exception that triggered the finally block below."""
+    db = SessionLocal()
+    try:
+        db.add(
+            AuditLog(
+                user_id=_try_get_user_id(request),
+                method=request.method,
+                path=request.url.path,
+                status_code=status_code,
+            )
+        )
+        db.commit()
+    except Exception:
+        # Logging must never take down the request or hide the original error.
+        # TODO(team): route this to real logging once we have one.
+        pass
+    finally:
+        db.close()
+
+
 class AuditLogMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-
-        if request.method in AUDITED_METHODS:
-            db = SessionLocal()
-            try:
-                db.add(
-                    AuditLog(
-                        user_id=_try_get_user_id(request),
-                        method=request.method,
-                        path=request.url.path,
-                        status_code=response.status_code,
-                    )
-                )
-                db.commit()
-            finally:
-                db.close()
-
-        return response
+        status_code = 500  # default if call_next raises before producing a response
+        try:
+            response = await call_next(request)
+            status_code = response.status_code
+            return response
+        finally:
+            if request.method in AUDITED_METHODS:
+                _write_audit_row(request, status_code)
