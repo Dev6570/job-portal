@@ -5,7 +5,8 @@ import { register } from "../../api/auth.js";
 import { extractErrorMessage } from "../../api/errors.js";
 import { buildRegisterPayload } from "../../auth/registerPayload.js";
 import { homePathForRole } from "../../auth/roles.js";
-import { inputCls, labelCls, primaryBtnCls } from "../../components/styles.js";
+import { errorBoxCls, inputCls, labelCls, primaryBtnCls } from "../../components/styles.js";
+import AuthLayout from "../../components/AuthLayout.jsx";
 
 const EMPTY_FORM = {
   role: "student",
@@ -52,20 +53,19 @@ export default function RegisterPage() {
   const isStudent = form.role === "student";
 
   return (
-    <div className="mx-auto my-10 max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-      <h1 className="mb-4 text-xl font-semibold">Create an account</h1>
-
-      <div className="mb-4 flex gap-2">
+    <AuthLayout title="Create your account" subtitle="Choose how you will use the portal.">
+      <div className="mb-5 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
         {["student", "company"].map((role) => (
           <button
             key={role}
             type="button"
             onClick={() => setForm((prev) => ({ ...prev, role }))}
+            aria-pressed={form.role === role}
             className={
-              "flex-1 rounded-md border px-3 py-2 text-sm font-medium capitalize " +
+              "rounded-lg px-3 py-2 text-sm font-medium capitalize transition " +
               (form.role === role
-                ? "border-indigo-600 bg-indigo-50 text-indigo-700"
-                : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50")
+                ? "bg-white text-indigo-700 shadow-sm"
+                : "text-slate-600 hover:text-slate-900")
             }
           >
             {role}
@@ -73,7 +73,7 @@ export default function RegisterPage() {
         ))}
       </div>
 
-      {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && <p className={errorBoxCls + " mb-4"} role="alert">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -133,9 +133,10 @@ export default function RegisterPage() {
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-slate-600">
-        Already registered? <Link className="text-indigo-600 underline" to="/login">Log in</Link>
+      <p className="mt-6 text-center text-sm text-slate-600">
+        Already registered?{" "}
+        <Link className="font-semibold text-indigo-600 hover:text-indigo-700" to="/login">Log in</Link>
       </p>
-    </div>
+    </AuthLayout>
   );
 }

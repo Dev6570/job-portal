@@ -3,7 +3,8 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { extractErrorMessage } from "../../api/errors.js";
 import { homePathForRole } from "../../auth/roles.js";
-import { inputCls, labelCls, primaryBtnCls } from "../../components/styles.js";
+import { errorBoxCls, inputCls, labelCls, primaryBtnCls, successBoxCls } from "../../components/styles.js";
+import AuthLayout from "../../components/AuthLayout.jsx";
 
 export default function LoginPage() {
   const { user, login } = useAuth();
@@ -35,21 +36,19 @@ export default function LoginPage() {
   const justRegistered = location.state && location.state.registered;
 
   return (
-    <div className="mx-auto mt-16 max-w-sm rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-      <h1 className="mb-4 text-xl font-semibold">Log in</h1>
-
+    <AuthLayout title="Welcome back" subtitle="Log in to continue to your account.">
       {justRegistered && (
-        <p className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-800">
+        <p className={successBoxCls + " mb-4"}>
           Account created. Please log in.
           {location.state.role === "company" && " An admin will review company accounts."}
         </p>
       )}
-      {error && <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && <p className={errorBoxCls + " mb-4"} role="alert">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className={labelCls} htmlFor="email">Email</label>
-          <input id="email" type="email" required autoComplete="username" className={inputCls}
+          <input id="email" type="email" required autoComplete="username" placeholder="you@example.com" className={inputCls}
             value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <div>
@@ -62,9 +61,10 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-slate-600">
-        No account? <Link className="text-indigo-600 underline" to="/register">Register</Link>
+      <p className="mt-6 text-center text-sm text-slate-600">
+        No account?{" "}
+        <Link className="font-semibold text-indigo-600 hover:text-indigo-700" to="/register">Create one</Link>
       </p>
-    </div>
+    </AuthLayout>
   );
 }
