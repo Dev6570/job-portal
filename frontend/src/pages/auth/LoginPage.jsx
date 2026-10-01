@@ -12,6 +12,7 @@ export default function LoginPage() {
   const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -53,8 +54,20 @@ export default function LoginPage() {
         </div>
         <div>
           <label className={labelCls} htmlFor="password">Password</label>
-          <input id="password" type="password" required autoComplete="current-password" className={inputCls}
-            value={password} onChange={(e) => setPassword(e.target.value)} />
+          <div className="relative">
+            <input id="password" type={showPassword ? "text" : "password"} required autoComplete="current-password"
+              className={inputCls + " pr-16"}
+              value={password} onChange={(e) => setPassword(e.target.value)} />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-sm font-medium text-slate-500 hover:text-slate-700"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              tabIndex={-1}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
         </div>
         <button type="submit" disabled={submitting} className={primaryBtnCls + " w-full"}>
           {submitting ? "Logging in..." : "Log in"}
