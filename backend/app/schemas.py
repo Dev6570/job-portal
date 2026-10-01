@@ -29,12 +29,34 @@ class RegisterRequest(BaseModel):
     company: CompanyRegisterExtra | None = None
 
 
+class StudentProfileOut(BaseModel):
+    full_name: str
+    branch: str | None = None
+    cgpa: float | None = None
+    backlogs: int
+    batch_year: int | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class CompanyProfileOut(BaseModel):
+    company_name: str
+    website: str | None = None
+    is_verified: bool
+
+    model_config = {"from_attributes": True}
+
+
 class UserOut(BaseModel):
     id: uuid.UUID
     email: EmailStr
     role: UserRole
     is_active: bool
     created_at: datetime
+    # Populated from the matching one-to-one relationship on User; whichever
+    # one doesn't apply to this user's role stays None.
+    student_profile: StudentProfileOut | None = None
+    company_profile: CompanyProfileOut | None = None
 
     model_config = {"from_attributes": True}
 
