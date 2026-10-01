@@ -7,7 +7,8 @@ import Spinner from "./components/Spinner.jsx";
 import LoginPage from "./pages/auth/LoginPage.jsx";
 import RegisterPage from "./pages/auth/RegisterPage.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
-import RolePlaceholder from "./pages/RolePlaceholder.jsx";
+import StudentDashboard from "./pages/student/StudentDashboard.jsx";
+import CompanyDashboard from "./pages/company/CompanyDashboard.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 
 function HomeRedirect() {
@@ -35,7 +36,7 @@ export default function App() {
         path="/student"
         element={
           <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-            <AppShell><RolePlaceholder title="Student area" /></AppShell>
+            <AppShell><StudentDashboard /></AppShell>
           </ProtectedRoute>
         }
       />
@@ -43,7 +44,7 @@ export default function App() {
         path="/company"
         element={
           <ProtectedRoute allowedRoles={[ROLES.COMPANY]}>
-            <AppShell><RolePlaceholder title="Company area" /></AppShell>
+            <AppShell><CompanyDashboard /></AppShell>
           </ProtectedRoute>
         }
       />
