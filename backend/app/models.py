@@ -36,6 +36,13 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False)
+    # Set when an admin deactivates this user; cleared on reactivation.
+    # Drives the 3-month student archival job - see app/jobs/archival.py.
+    deactivated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Set by the archival job once a deactivated student has been inactive
+    # for 90+ days. Archiving never deletes the row - it just hides the
+    # user from the default admin Users list.
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     student_profile: Mapped["Student | None"] = relationship(
         back_populates="user", uselist=False, cascade="all, delete-orphan"

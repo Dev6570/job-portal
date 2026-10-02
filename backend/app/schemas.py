@@ -53,6 +53,8 @@ class UserOut(BaseModel):
     role: UserRole
     is_active: bool
     created_at: datetime
+    deactivated_at: datetime | None = None
+    archived_at: datetime | None = None
     # Populated from the matching one-to-one relationship on User; whichever
     # one doesn't apply to this user's role stays None.
     student_profile: StudentProfileOut | None = None

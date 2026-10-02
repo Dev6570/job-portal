@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.dependencies import get_current_user, require_role
 from app.database import get_db
-from app.models import AuditLog, Company, User, UserRole
+from app.models import AuditLog, Company, User, UserRole, utcnow
 from app.schemas import AuditLogOut, CompanyOut, UserOut
 
 router = APIRouter(
@@ -32,8 +32,11 @@ def verify_company(company_id: uuid.UUID, db: Session = Depends(get_db)):
 
 
 @router.get("/users", response_model=list[UserOut])
-def list_users(db: Session = Depends(get_db)):
-    return db.query(User).all()
+def list_users(db: Session = Depends(get_db), include_archived: bool = False):
+    query = db.query(User)
+    if not include_archived:
+        query = query.filter(User.archived_at.is_(None))
+    return query.all()
 
 
 @router.patch("/users/{user_id}/deactivate", response_model=UserOut)
@@ -58,6 +61,7 @@ def deactivate_user(
     # admin. The only path to zero active admins is self-deactivation,
     # which is already blocked above.
     target.is_active = False
+    target.deactivated_at = utcnow()
     db.commit()
     db.refresh(target)
     return target
@@ -70,6 +74,8 @@ def activate_user(user_id: uuid.UUID, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     target.is_active = True
+    target.deactivated_at = None
+    target.archived_at = None  # reactivating also un-archives, if applicable
     db.commit()
     db.refresh(target)
     return target
